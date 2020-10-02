@@ -19,7 +19,7 @@ from sklearn.metrics import accuracy_score
 ### Task 1: Select what features you'll use.
 ### features_list is a list of strings, each of which is a feature name.
 ### The first feature must be "poi".
-features_list = ['poi','salary','from_poi_to_this_person', 'to_messages', 'from_messages'
+features_list = ['poi','salary','from_poi_to_this_person', 'to_messages', 'from_messages',
                 'from_this_person_to_poi', 'shared_receipt_with_poi'] # You will need to use more features
 
 ### Load the dictionary containing the dataset
@@ -75,23 +75,6 @@ features_list = features_list + ['percent_received_from_poi', 'percent_sent_to_p
 data = featureFormat(my_dataset, features_list, sort_keys = True)
 labels, features = targetFeatureSplit(data)
 
-### Create function: univariate feature selection with SelectKBest
-def select_k_best(k):
-    select_k_best = SelectKBest(k=k)
-    select_k_best.fit(features_i, labels_i)
-    scores = select_k_best.scores_
-    unsorted_pairs = zip(all_features[1:], scores)
-    k_best_features = dict(list(reversed(sorted(unsorted_pairs, key=lambda x: x[1])))[:k])
-    return [target_label] + list(k_best_features.keys())
-
-### Create function to print out features and scores by given K value
-def k_best_features_score(k):
-    select_k_best = SelectKBest(k=k)
-    select_k_best.fit(features_i, labels_i)
-    scores = select_k_best.scores_
-    unsorted_pairs = zip(all_features[1:], scores)
-    k_best_features = dict(list(reversed(sorted(unsorted_pairs, key=lambda x: x[1])))[:k])
-    print (k_best_features)
 
 ### Task 4: Try a varity of classifiers
 ### Please name your classifier clf for easy export below.
@@ -100,8 +83,28 @@ def k_best_features_score(k):
 ### http://scikit-learn.org/stable/modules/pipeline.html
 
 # Provided to give you a starting point. Try a variety of classifiers.
-from sklearn.naive_bayes import GaussianNB
-clf = GaussianNB()
+# GaussianNB
+nb_clf = GaussianNB()
+nb_clf.fit(features, labels)
+nb_score = nb_clf.score(features_test, labels_test)
+print "Naive Bayes Score: " + str(nb_score)
+
+#SVC
+
+svc_clf = SVC(kernel = "linear")
+svc_clf.fit(features, labels)
+svc_score = svc_clf.score(features_test, labels_test)
+print "SVC Score: " + str(svc_score)
+
+tree_clf = DecisionTreeClassifier()
+tree_clf.fit(features, labels)
+tree_score = tree_clf.score(features_test, labels_test)
+print "Decision Tree Score: " + str(tree_score)
+
+k_clf = KNeighborsClassifier()
+k_clf.fit(features, labels)
+k_score = k_clf.score(features_test, labels_test)
+print "K Nearest Neighbors Score: " + str(k_score)
 
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
 ### using our testing script. Check the tester.py script in the final project
@@ -114,7 +117,32 @@ clf = GaussianNB()
 from sklearn.model_selection import train_test_split
 features_train, features_test, labels_train, labels_test = \
     train_test_split(features, labels, test_size=0.3, random_state=42)
+clf = KNeighborsClassifier()
+clf.fit(features_train, labels_train)
+clf_score = clf.score(features_test, labels_test)
+print "Classifier Score =: " +str(clf_score)
 
+from sklearn import tree
+from sklearn.model_selection import train_test_split
+
+features_train, features_test, labels_train, labels_test = train_test_split(features, labels ,test_size=0.3, random_state = 42)
+
+clf = tree.DecisionTreeClassifier()
+clf.fit(features_train,labels_train)
+score = clf.score(features_test, labels_test)
+
+print "Accuracy Score: " + str(score)
+
+from sklearn.linear_model import LinearRegression
+reg = LinearRegression()
+reg.fit(features_test, labels_test)
+reg_score = reg.score(features_test, labels_test)
+print "Regression Score: " + str(reg_score)
+
+from sklearn.metrics import accuracy_score
+pred = (clf.predict(features_test))
+accuracy = accuracy_score(pred, labels_test)
+print "Accuracy: " + str(accuracy)
 ### Task 6: Dump your classifier, dataset, and features_list so anyone can
 ### check your results. You do not need to change anything below, but make sure
 ### that the version of poi_id.py that you submit can be run on its own and
