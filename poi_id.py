@@ -200,12 +200,12 @@ features_list = features_list + ['percent_received_from_poi', 'percent_sent_to_p
     
 ### Extract features and labels from dataset for local testing
 my_dataset = featureFormat(my_dataset, features_list)
-labels_i, features_i =targetFeatureSplit(my_dataset)
+labels, features =targetFeatureSplit(my_dataset)
 
 ###Using SelectKBest to choose the best features to run through the classifiers
 def k_best_features_score(k):
     select_k_best = SelectKBest(k=k)
-    select_k_best.fit(features_i, labels_i)
+    select_k_best.fit(features, labels)
     scores = select_k_best.scores_
     unsorted_pairs = zip(features_list[1:], scores)
     k_best = dict(list(reversed(sorted(unsorted_pairs, key=lambda x: x[1])))[:k])
@@ -227,31 +227,40 @@ print sorted_dict_scores
 ### you'll need to use Pipelines. For more info:
 ### http://scikit-learn.org/stable/modules/pipeline.html
 
+#
+from sklearn.model_selection import train_test_split
+features_train, features_test, labels_train, labels_test = \
+    train_test_split(features, labels, test_size=0.3, random_state=42)
+
 # Provided to give you a starting point. Try a variety of classifiers.
 # GaussianNB
 
-###
+
+#Naive Bayes
 nb_clf = GaussianNB()
-nb_clf.fit(features_i, labels_i)
-pred = clf.predict(features_test_)
-nb_score = nb_clf.score(pred, labels_test)
+nb_clf.fit(features_train, labels_train)
+nb_pred = nb_clf.predict(features_test)
+nb_score = nb_clf.score(nb_pred, labels_test)
 print "Naive Bayes Score: " + str(nb_score)
 
 #SVC
 
 svc_clf = SVC(kernel = "linear")
-svc_clf.fit(features_i, labels_i)
-svc_score = svc_clf.score(features_test, labels_test)
+svc_clf.fit(features_train, labels_train)
+svc_pred = svc_clf.predict(features_test)
+svc_score = svc_clf.score(svc_pred, labels_test)
 print "SVC Score: " + str(svc_score)
 
 tree_clf = DecisionTreeClassifier()
-tree_clf.fit(features_i, labels_i)
-tree_score = tree_clf.score(features_test, labels_test)
+tree_clf.fit(features_train, labels_train)
+tree_pred = tree_clf.predict(features_test)
+tree_score = tree_clf.score(tree_pred, labels_test)
 print "Decision Tree Score: " + str(tree_score)
 
 k_clf = KNeighborsClassifier()
-k_clf.fit(features_i, labels_i)
-k_score = k_clf.score(features_test, labels_test)
+k_clf.fit(features_train, labels_train)
+k_pred = k_clf.predict(features_test)
+k_score = k_clf.score(k_pred, labels_test)
 print "K Nearest Neighbors Score: " + str(k_score)
 
 
@@ -265,20 +274,14 @@ print "K Nearest Neighbors Score: " + str(k_score)
 # Example starting point. Try investigating other evaluation techniques!
 from sklearn.model_selection import train_test_split
 features_train, features_test, labels_train, labels_test = \
-    train_test_split(features_i, labels_i, test_size=0.3, random_state=42)
-clf = KNeighborsClassifier()
-clf.fit(features_train, labels_train)
-clf_score = clf.score(features_test, labels_test)
+    train_test_split(features, labels, test_size=0.3, random_state=42)
 
 
-from sklearn import tree
+#from sklearn import tree
 from sklearn.model_selection import train_test_split
 
 features_train, features_test, labels_train, labels_test = train_test_split(features, labels ,test_size=0.3, random_state = 42)
 
-clf = tree.DecisionTreeClassifier()
-clf.fit(features_train,labels_train)
-score = clf.score(features_test, labels_test)
 
 
 
