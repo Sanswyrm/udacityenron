@@ -239,28 +239,24 @@ features_train, features_test, labels_train, labels_test = \
 #Naive Bayes
 nb_clf = GaussianNB()
 nb_clf.fit(features_train, labels_train)
-nb_pred = nb_clf.predict(features_test)
-nb_score = nb_clf.score(nb_pred, labels_test)
+nb_score = nb_clf.score(features_test, labels_test)
 print "Naive Bayes Score: " + str(nb_score)
 
 #SVC
 
 svc_clf = SVC(kernel = "linear")
 svc_clf.fit(features_train, labels_train)
-svc_pred = svc_clf.predict(features_test)
-svc_score = svc_clf.score(svc_pred, labels_test)
+svc_score = svc_clf.score(features_test, labels_test)
 print "SVC Score: " + str(svc_score)
 
 tree_clf = DecisionTreeClassifier()
 tree_clf.fit(features_train, labels_train)
-tree_pred = tree_clf.predict(features_test)
-tree_score = tree_clf.score(tree_pred, labels_test)
+tree_score = tree_clf.score(features_test, labels_test)
 print "Decision Tree Score: " + str(tree_score)
 
 k_clf = KNeighborsClassifier()
 k_clf.fit(features_train, labels_train)
-k_pred = k_clf.predict(features_test)
-k_score = k_clf.score(k_pred, labels_test)
+k_score = k_clf.score(features_test, labels_test)
 print "K Nearest Neighbors Score: " + str(k_score)
 
 
@@ -292,12 +288,10 @@ reg_score = reg.score(features_test, labels_test)
 
 
 
-pred = (clf.predict(features_test))
-accuracy = accuracy_score(pred, labels_test)
 
 ### Task 6: Dump your classifier, dataset, and features_list so anyone can
 ### check your results. You do not need to change anything below, but make sure
 ### that the version of poi_id.py that you submit can be run on its own and
 ### generates the necessary .pkl files for validating your results.
 
-dump_classifier_and_data(clf, my_dataset, features_list)
+#dump_classifier_and_data(clf, my_dataset, features_list)
