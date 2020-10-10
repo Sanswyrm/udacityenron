@@ -3,6 +3,8 @@
 import sys
 import pickle
 import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
 sys.path.append("../tools/")
 from pprint import pprint
 from feature_format import featureFormat, targetFeatureSplit
@@ -18,8 +20,11 @@ from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import StratifiedShuffleSplit
-import pandas as pd
-import numpy as np
+from sklearn.datasets import load_iris 
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression 
+
+
 import operator
 ### Task 1: Select what features you'll use.
 ### features_list is a list of strings, each of which is a feature name.
@@ -49,7 +54,7 @@ features_list = [
         'shared_receipt_with_poi']                      
 
 ### Load the dictionary containing the dataset
-with open("final_project_dataset.pkl", "r") as data_file:
+with open('final_project_dataset.pkl', 'r') as data_file:
     data_dict = pickle.load(data_file)
     
 ### Convert the file to a Pandas Dataframe per mentor suggestion
@@ -58,18 +63,19 @@ enron = pd.DataFrame.from_dict(data_dict, orient = 'index')
 print(enron.head())
 
 ### Total Number of Data Points
-print 'Total Number of data points: %d' %len(data_dict)
+total_data_points = len(data_dict)
+print( 'Total Number of data points: ' + str(total_data_points))
 
 ### Number of POIs
 num_poi = len(enron[enron['poi'].astype(np.float32)==1])
 num_non_poi = len(data_dict) - num_poi
 
-print 'Number of POIs:' + str(num_poi)
-print 'Number of Non-POIs:' + str(num_non_poi)
+print ('Number of POIs:' + str(num_poi))
+print ('Number of Non-POIs:' + str(num_non_poi))
 
 ### Number of Features
-
-print 'Number of features: %d' %len(features_list)
+num_features = len(features_list)
+print ('Number of features: ' + str(num_features))
 
 ### Missing Features
 def num_missing_value(feature):
@@ -78,7 +84,7 @@ def num_missing_value(feature):
         person = data_dict[name]
         if person[feature] == 'NaN':
             num_missing_value += 1
-    print 'Number of Missing features:' + str(num_missing_value)
+    print ('Number of Missing features:' + str(num_missing_value))
     
 
 ### Task 2: Remove outliers
@@ -88,15 +94,15 @@ def plot_two_dimensions(data_dict, feature_x, feature_y):
      for point in data:
          x = point[0]
          y = point[1]
-         plt.scatter(x,y)
+         plt.scatter(x, y)
      plt.xlabel(feature_x)
      plt.ylabel(feature_y)
      plt.show()
 
 ## Plotting 'total_payments' and 'total_stock_values'
 
-print plot_two_dimensions(data_dict, 'salary', 'total_payments')
-print plot_two_dimensions(data_dict, 'salary', 'total_stock_value')     
+print (plot_two_dimensions(data_dict, 'salary', 'total_payments'))
+print (plot_two_dimensions(data_dict, 'salary', 'total_stock_value'))     
 
 ###total_payments outlier 
 total_payment_outlier = []
@@ -126,20 +132,20 @@ for key in data_dict:
     outliers.append((key,int(val)))
 
 ### Sort the list of outliers and print the top 1 outlier in the list
-print 'Outliers in terms of Total Payments:'
+print ('Outliers in terms of Total Payments:')
 pprint(sorted(total_payment_outlier, key =lambda x:x[1],reverse=True)[:3])
 
-print 'Outliers in terms of Total Stock Value:'    
+print ('Outliers in terms of Total Stock Value:' )   
 pprint(sorted(total_payment_outlier, key =lambda x:x[1],reverse=True)[:3])
-print 'Outliers in terms of salary: '
+print ('Outliers in terms of salary: ')
 pprint(sorted(outliers,key=lambda x:x[1],reverse=True)[:3])
 
 ### Remove the top 1 outlier: the total line
 data_dict.pop('TOTAL')
 
 ### Reprint Plot with outlier 'Total Removed"
-print plot_two_dimensions(data_dict, 'salary', 'total_payments')
-print plot_two_dimensions(data_dict, 'salary', 'total_stock_value')
+print (plot_two_dimensions(data_dict, 'salary', 'total_payments'))
+print (plot_two_dimensions(data_dict, 'salary', 'total_stock_value'))
 
 total_payment_outlier = []
 for key in data_dict:
@@ -167,14 +173,17 @@ for key in data_dict:
 
 
 ### Sort the list of outliers and print the 3 outliers in the list
-print 'Outliers in terms of salary: '
+print ('Outliers in terms of salary: ')
 pprint(sorted(outliers,key=lambda x:x[1],reverse=True)[:3])
+print ("")
 
-print 'Outliers in terms of Total Payments: '
+print ('Outliers in terms of Total Payments: ')
 pprint(sorted(total_payment_outlier, key =lambda x:x[1],reverse=True)[:3])
+print ("")
 
-print 'Outliers in terms of Total Stock Value:'    
+print ('Outliers in terms of Total Stock Value:')    
 pprint(sorted(total_payment_outlier, key =lambda x:x[1],reverse=True)[:3])
+print ("")
 ### Task 3: Create new feature(s)
 ### Store to my_dataset for easy export below.
 my_dataset = data_dict
@@ -217,8 +226,8 @@ k_best = k_best_features_score(len(features_list)-1)
 
 sorted_dict_scores = sorted(k_best.items(), key=operator.itemgetter(1),reverse = True)
 print ('All features and scores:')
-print sorted_dict_scores
- 
+print (sorted_dict_scores)
+print ("") 
 
 
 ### Task 4: Try a varity of classifiers
@@ -233,32 +242,21 @@ features_train, features_test, labels_train, labels_test = \
     train_test_split(features, labels, test_size=0.3, random_state=42)
 
 # Provided to give you a starting point. Try a variety of classifiers.
-# GaussianNB
 
-
-#Naive Bayes
+### Gaussian Naive Bayes
 nb_clf = GaussianNB()
 nb_clf.fit(features_train, labels_train)
 nb_score = nb_clf.score(features_test, labels_test)
-print "Naive Bayes Score: " + str(nb_score)
+print ("Naive Bayes Score: " + str(nb_score))
+print ("")
 
-#SVC
-
-svc_clf = SVC(kernel = "linear")
-svc_clf.fit(features_train, labels_train)
-svc_score = svc_clf.score(features_test, labels_test)
-print "SVC Score: " + str(svc_score)
-
-tree_clf = DecisionTreeClassifier()
-tree_clf.fit(features_train, labels_train)
-tree_score = tree_clf.score(features_test, labels_test)
-print "Decision Tree Score: " + str(tree_score)
-
-k_clf = KNeighborsClassifier()
-k_clf.fit(features_train, labels_train)
-k_score = k_clf.score(features_test, labels_test)
-print "K Nearest Neighbors Score: " + str(k_score)
-
+#Using Pipeline to Run other Classifiers as code would 'hang up' when attempting to run SVC, KNN and Decision Tree
+classifiers = [('svc', SVC(C=1.0, kernel='linear')), ('tree', DecisionTreeClassifier()),('KNN', KNeighborsClassifier())]
+pipe =  Pipeline(classifiers)
+grid = GridSearchCV(pipe, param_grid=parameters, cv = 5)
+grid.fit(features_train, labels_train)
+print "score = %3.2f" %(grid.score(features_test,labels_test))
+print grid.best_params_
 
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
 ### using our testing script. Check the tester.py script in the final project
@@ -272,8 +270,6 @@ from sklearn.model_selection import train_test_split
 features_train, features_test, labels_train, labels_test = \
     train_test_split(features, labels, test_size=0.3, random_state=42)
 
-
-#from sklearn import tree
 from sklearn.model_selection import train_test_split
 
 features_train, features_test, labels_train, labels_test = train_test_split(features, labels ,test_size=0.3, random_state = 42)
@@ -281,10 +277,6 @@ features_train, features_test, labels_train, labels_test = train_test_split(feat
 
 
 
-from sklearn.linear_model import LinearRegression
-reg = LinearRegression()
-reg.fit(features_test, labels_test)
-reg_score = reg.score(features_test, labels_test)
 
 
 
