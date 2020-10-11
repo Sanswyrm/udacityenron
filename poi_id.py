@@ -251,12 +251,13 @@ print ("Naive Bayes Score: " + str(nb_score))
 print ("")
 
 #Using Pipeline to Run other Classifiers as code would 'hang up' when attempting to run SVC, KNN and Decision Tree
-classifiers = [('svc', SVC(C=1.0, kernel='linear')), ('tree', DecisionTreeClassifier()),('KNN', KNeighborsClassifier())]
-pipe =  Pipeline(classifiers)
-grid = GridSearchCV(pipe, param_grid=parameters, cv = 5)
-grid.fit(features_train, labels_train)
-print "score = %3.2f" %(grid.score(features_test,labels_test))
-print grid.best_params_
+svc_parameters = {'kernel':('linear'), 'C':[1, 10]}
+svc_classifiers = ['svm', SVC(kernel='linear')]
+svc_pipe =  Pipeline(svc_classifiers)
+svc_grid = GridSearchCV(svc_pipe, param_grid=svc_parameters, cv = 5)
+svc_grid.fit(features_train, labels_train)
+print "score = %3.2f" %(svc_grid.score(features_test,labels_test))
+print svc_grid.best_params_
 
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
 ### using our testing script. Check the tester.py script in the final project
