@@ -23,6 +23,7 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.datasets import load_iris 
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression 
+from sklearn import svm, datasets
 
 
 import operator
@@ -248,18 +249,21 @@ nb_clf = GaussianNB()
 nb_clf.fit(features_train, labels_train)
 nb_score = nb_clf.score(features_test, labels_test)
 print ("Naive Bayes Score: " + str(nb_score))
-print ("")
 
 #Using Pipeline to Run other Classifiers as code would 'hang up' when attempting to run SVC, KNN and Decision Tree
-
-svc_parameters = {'SVM__C':[0.001,0.1,10,100,10e5], 'SVM__gamma':[0.1,0.01]}
-svc_steps = [('SVM', SVC(kernel='linear'))]
-svc_pipe =  Pipeline(svc_steps)
-svc_grid = GridSearchCV(svc_pipe, param_grid=svc_parameters, cv = 5)
-svc_grid.fit(features_train, labels_train)
-print "score = %3.2f" %(svc_grid.score(features_test,labels_test))
-print svc_grid.best_params_
-
+from sklearn.preprocessing import StandardScaler
+from sklearn import svm
+svm = Pipeline([('scaler',StandardScaler()),('svm',svm.SVC())])
+param_grid = ([{'svm__C': [1,50,100,1000],
+                'svm__gamma': [0.5, 0.1, 0.01],
+                'svm__degree':[1,2],
+                'svm__kernel': ['rbf','poly']}])
+svm_clf = GridSearchCV(svm, param_grid, scoring='recall').fit(features, labels)
+Pipeline(steps=[('scaler', StandardScaler(copy=True, with_mean=True, with_std=True)), ('svm', SVC(C=100, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape=None, degree=2, gamma=0.1, kernel='poly',
+  max_iter=-1, probability=False, random_state=None, shrinking=True,
+  tol=0.001, verbose=False))])
+print "SVM Score: %3.2f" %(svm_clf.score(features_test, labels_test))
 
 #Pipeline for Decisions Tree
 tree_parameters={}
@@ -267,9 +271,15 @@ tree_classifier=[('Decision Tree', DecisionTreeClassifier())]
 tree_pipe = Pipeline(tree_classifier)
 tree_grid = GridSearchCV(tree_pipe, param_grid=tree_parameters, cv = 5)
 tree_grid.fit(features_train, labels_train)
-print "Score = %3.2f" %(tree_grid.score(features_test, labels_test))
-print tree_grid.best_params_
+print "Decision Tree Score: %3.2f" %(tree_grid.score(features_test, labels_test))
+#print tree_grid.best_params_
 
+knn_parameters ={}
+knn_classifier=[('knn', KNeighborsClassifier())]
+knn_pipe = Pipeline(knn_classifier)
+knn_grid = GridSearchCV(knn_pipe, param_grid = knn_parameters, cv = 5)
+knn_grid.fit(features_train, labels_train)
+print "K Nearest Neighbors Score: %3.2f" %(knn_grid.score(features_test, labels_test))
 
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
 ### using our testing script. Check the tester.py script in the final project
@@ -287,8 +297,23 @@ from sklearn.model_selection import train_test_split
 
 features_train, features_test, labels_train, labels_test = train_test_split(features, labels ,test_size=0.3, random_state = 42)
 
+# Create a simple classifier
+#classifier = svm.LinearSVC(random_state=random_state)
+
+#y_score = classifier.decision_function(X_test)
+knn_parameters ={}
+knn_classifier=[('knn', KNeighborsClassifier())]
+knn_pipe = Pipeline(knn_classifier)
+knn_grid = GridSearchCV(knn_pipe, param_grid = knn_parameters, cv = 5)
+knn_grid.fit(features_train, labels_train)
+knn_score = (knn_grid.score(features_test, labels_test))
 
 
+from sklearn.metrics import average_precision_score
+average_precision = average_precision_score(labels_test, knn_score)
+
+print('Average precision-recall score: {0:0.2f}'.format(
+      average_precision))
 
 
 
