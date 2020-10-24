@@ -30,7 +30,28 @@ import operator
 ### Task 1: Select what features you'll use.
 ### features_list is a list of strings, each of which is a feature name.
 ### The first feature must be "poi".
+def estimate_classifier(clf, dataset, feature_list, folds = 1000):
+    data = featureFormat(dataset, feature_list, sort_keys = True)
+    labels, features = targetFeatureSplit(data)
+    sss = StratifiedShuffleSplit(n_splits=1000, random_state=42)
+    cv_f1_scores = []
+    for train_idx, test_idx in sss.split(features, labels):
+        features_train = []
+        features_test  = []
+        labels_train   = []
+        labels_test    = []
+        for ii in train_idx:
+            features_train.append( features[ii] )
+            labels_train.append( labels[ii] )
+        for jj in test_idx:
+            features_test.append( features[jj] )
+            labels_test.append( labels[jj] )
 
+        ### fit the classifier using training set, and test on test set
+        clf.fit(features_train, labels_train)
+        predictions = clf.predict(features_test)
+        cv_f1_scores.append(f1_score(predictions, labels_test))
+    return np.mean(cv_f1_scores)
 ### Formatted Features list as vertical list to avoid missing commas and more easily find if any EOL erros
 features_list = [
         'poi',
@@ -268,16 +289,16 @@ print ("SVM Score: %3.2f" %(svm_clf.score(features_test, labels_test)))
 
 #Pipeline for Decisions Tree
 tree_parameters={}
-tree_classifier=[('Decision Tree', DecisionTreeClassifier())]
-tree_pipe = Pipeline(tree_classifier)
+tree_clf=[('Decision Tree', DecisionTreeClassifier())]
+tree_pipe = Pipeline(tree_clf)
 tree_grid = GridSearchCV(tree_pipe, param_grid=tree_parameters, cv = 5)
 tree_grid.fit(features_train, labels_train)
 print( "Decision Tree Score: %3.2f" %(tree_grid.score(features_test, labels_test)))
 #print tree_grid.best_params_
 
 knn_parameters ={}
-knn_classifier=[('knn', KNeighborsClassifier())]
-knn_pipe = Pipeline(knn_classifier)
+knn_clf=[('knn', KNeighborsClassifier())]
+knn_pipe = Pipeline(knn_clf)
 knn_grid = GridSearchCV(knn_pipe, param_grid = knn_parameters, cv = 5)
 knn_grid.fit(features_train, labels_train)
 print ("K Nearest Neighbors Score: %3.2f" %(knn_grid.score(features_test, labels_test)))
@@ -298,8 +319,19 @@ from sklearn.model_selection import train_test_split
 
 features_train, features_test, labels_train, labels_test = train_test_split(features, labels ,test_size=0.3, random_state = 42)
 
-# Create a simple classifier
-#classifier = svm.LinearSVC(random_state=random_state)
+classifiers = [svm_clf, tree_clf, knn_clf]
+
+best_clf = None
+best_f1_score = -1.0
+for clf in classifiers:
+    clf.fit(features, labels)
+    f1 = estimate_classifier(clf.best_estimator_, my_dataset, features_list)
+    if f1 > best_f1_score:
+        best_clf = clf
+        best_f1_score = f1
+    print('estimator: {}, f1 score: {}'.format(clf.best_estimator_, f1))
+    print
+
 
 knn_parameters ={}
 knn_clf=[('knn', KNeighborsClassifier())]
@@ -309,7 +341,8 @@ knn_grid.fit(features_train, labels_train)
 
 print( "K Nearest Neighbors Score: %3.2f" %(knn_grid.score(features_test, labels_test)))
 
-from sklearn.model_selection import cross_val_score
+
+
                  
 
 
